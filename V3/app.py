@@ -1,23 +1,3 @@
-"""
-Aplicación web (v3): motor DUKPT + módulo de intercambio de llaves TR-31,
-con flujo de doble custodia para los componentes de la KEK.
-
-Notas de seguridad de esta implementación (léelas antes de usarla en un
-entorno real, ver README.md para el detalle completo):
-
-  - Las sesiones de custodios y los archivos de resultado se guardan
-    ÚNICAMENTE EN MEMORIA del proceso (diccionarios en RAM), protegidos por
-    un lock. Esto es suficiente para una demo / ejercicio con un solo
-    contenedor, pero NO es un almacén apto para producción (se pierde todo
-    al reiniciar el contenedor, y no escala a múltiples réplicas).
-  - Los enlaces de custodio son de un solo uso (el token se invalida en
-    cuanto el custodio envía su componente) y expiran a los 30 minutos.
-  - Ningún valor completo de un componente de la KEK se imprime ni se
-    registra en ningún log de esta aplicación: toda superficie visible
-    (pantalla, logs de acceso, mensajes de error) usa `mask_value`, que
-    solo muestra los últimos 4 caracteres.
-"""
-
 import io
 import os
 import secrets
@@ -33,24 +13,6 @@ import crypto_core as cc
 
 app = Flask(__name__)
 
-# ---------------------------------------------------------------------------
-# Cabeceras de seguridad HTTP (mitigación de Tampering / clickjacking)
-#
-# CSP estricta: script-src 'self' SIN 'unsafe-inline' — por eso las
-# plantillas ya no usan onclick="..." ni <script> inline (ver app.js, que se
-# auto-inicializa a partir de atributos data-*). style-src sí permite
-# 'unsafe-inline' porque las plantillas usan algunos estilos en línea
-# puntuales (riesgo mucho menor que permitir scripts inline).
-#
-# Referrer-Policy = "same-origin" (NO "no-referrer"): para envíos de
-# formularios HTML (a diferencia de fetch/XHR), varios navegadores colapsan
-# la cabecera Origin al valor literal "null" cuando la política de referrer
-# es "no-referrer", incluso en un envío hacia el mismo origen — lo que
-# rompía exigir_mismo_origen() más abajo con un 403 en el uso normal.
-# "same-origin" evita ese colapso para nuestras propias páginas (que solo
-# envían formularios hacia sí mismas) sin dejar de bloquear el envío de
-# referrer hacia cualquier sitio externo.
-# ---------------------------------------------------------------------------
 
 @app.after_request
 def _agregar_cabeceras_seguridad(response):
@@ -66,20 +28,6 @@ def _agregar_cabeceras_seguridad(response):
     )
     return response
 
-
-# ---------------------------------------------------------------------------
-# Protección frente a solicitudes cross-site en formularios POST.
-#
-# Esta aplicación NO usa cookies de sesión ni autenticación (cualquiera con
-# la URL puede operarla — ver el hallazgo de Spoofing en el análisis de
-# seguridad), así que un token CSRF clásico atado a una cookie de sesión no
-# aportaría protección real: no hay "autoridad ambiental" que un atacante
-# pueda aprovechar sin ya conocer también la URL/token de la sesión. El
-# control proporcionado a esta arquitectura es validar que las solicitudes
-# que cambian estado (POST) vengan del mismo origen que sirve la app, para
-# bloquear el patrón clásico de CSRF (un sitio malicioso auto-enviando un
-# formulario oculto hacia esta aplicación).
-# ---------------------------------------------------------------------------
 
 def _mismo_origen(origen_header, host_esperado):
     if not origen_header or origen_header == "null":
@@ -100,13 +48,6 @@ def exigir_mismo_origen(f):
         return f(*args, **kwargs)
     return wrapper
 
-
-# ---------------------------------------------------------------------------
-# Rate limiting propio, en memoria (sin dependencias nuevas — consistente
-# con el resto del almacenamiento de esta app, ver advertencia arriba).
-# Mitiga Denial of Service por creación masiva de sesiones o envíos
-# repetidos, dentro de las limitaciones ya documentadas de un solo worker.
-# ---------------------------------------------------------------------------
 
 class _RateLimiter:
     def __init__(self):
