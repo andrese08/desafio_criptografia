@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block titulo %}Exportar PEK &mdash; Persona única{% endblock %}
+{% block contenido %}
+  <a class="btn-volver" href="{{ url_for('elegir_modo', proceso='export-pek') }}">&larr; Volver</a>
+
+  <div class="card">
+    <h2>Exportar PEK &mdash; Persona única</h2>
+    <div class="explicacion">
+      Ingresa los dos componentes de la KEK y su KCV esperado. El sistema
+      reconstruirá la KEK, generará una PEK aleatoria y la entregará envuelta
+      en un key block TR-31, ya autoverificado.
+    </div>
+
+    {% if error %}
+      <div class="alerta alerta-error">⚠ {{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      <label for="kek_component_1">Componente 1 de la KEK (hex, 64 caracteres)</label>
+      <input type="text" id="kek_component_1" name="kek_component_1" value="{{ valores.kek_component_1 }}" required>
+
+      <label for="kek_component_2">Componente 2 de la KEK (hex, 64 caracteres)</label>
+      <input type="text" id="kek_component_2" name="kek_component_2" value="{{ valores.kek_component_2 }}" required>
+
+      <label for="kek_kcv">KCV esperado de la KEK (hex, 6 caracteres)</label>
+      <input type="text" id="kek_kcv" name="kek_kcv" value="{{ valores.kek_kcv }}" required>
+
+      <button type="submit" class="btn">Generar PEK</button>
+    </form>
+  </div>
+
+  {% if resultado %}
+  <div class="card">
+    <h2>Resultado</h2>
+    <div class="resultado-bloque">Criptograma TR-31:  {{ resultado.block_hex }}
+KCV de la PEK TDES: {{ resultado.kcv_pek }}</div>
+
+    {% if resultado.autoverificacion_ok %}
+      <div class="alerta alerta-ok">✓ Autoverificación exitosa: el bloque se desenvuelve correctamente y el KCV coincide.</div>
+    {% else %}
+      <div class="alerta alerta-error">✗ Autoverificación FALLIDA.</div>
+    {% endif %}
+
+    {% if download_id %}
+      <a class="btn btn-secundario" href="{{ url_for('descargar', result_id=download_id) }}">⬇ Descargar resultado (.txt)</a>
+    {% endif %}
+  </div>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block titulo %}Suite de Intercambio de Llaves{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="icono">
+      <!-- Ícono genérico (candado + llave) - no reproduce ningún logo de terceros -->
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C9.24 2 7 4.24 7 7v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7c0-2.76-2.24-5-5-5zm0 2c1.66 0 3 1.34 3 3v3H9V7c0-1.66 1.34-3 3-3zm0 9a1.5 1.5 0 0 1 1.5 1.5c0 .66-.4 1.22-1 1.44V18a.5.5 0 0 1-1 0v-1.06c-.6-.22-1-.78-1-1.44A1.5 1.5 0 0 1 12 13z" fill="#009ee3"/>
+      </svg>
+    </div>
+    <div>
+      <div class="titulo">Suite de Intercambio de Llaves</div>
+      <div class="subtitulo">DUKPT &middot; TR-31 (ANSI X9.143)</div>
+    </div>
+  </header>
+
+  <main class="contenedor">
+    {% block contenido %}{% endblock %}
+  </main>
+
+  <footer class="pie">
+    Herramienta interna de laboratorio &mdash; no usar con llaves de producción sin una revisión de seguridad.
+  </footer>
+</body>
+</html>

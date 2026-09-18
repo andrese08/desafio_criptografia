@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titulo %}Importar BDK &mdash; Persona única{% endblock %}
+{% block contenido %}
+  <a class="btn-volver" href="{{ url_for('elegir_modo', proceso='import-bdk') }}">&larr; Volver</a>
+
+  <div class="card">
+    <h2>Importar BDK &mdash; Persona única</h2>
+    <div class="explicacion">
+      Ingresa los dos componentes de la KEK, su KCV esperado, el key block
+      TR-31 de la BDK recibido de la contraparte, y el KCV esperado de la
+      BDK. El sistema desenvolverá el bloque y validará su integridad.
+    </div>
+
+    {% if error %}
+      <div class="alerta alerta-error">⚠ {{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      <label for="kek_component_1">Componente 1 de la KEK (hex, 64 caracteres)</label>
+      <input type="text" id="kek_component_1" name="kek_component_1" value="{{ valores.kek_component_1 }}" required>
+
+      <label for="kek_component_2">Componente 2 de la KEK (hex, 64 caracteres)</label>
+      <input type="text" id="kek_component_2" name="kek_component_2" value="{{ valores.kek_component_2 }}" required>
+
+      <label for="kek_kcv">KCV esperado de la KEK (hex, 6 caracteres)</label>
+      <input type="text" id="kek_kcv" name="kek_kcv" value="{{ valores.kek_kcv }}" required>
+
+      <label for="bdk_keyblock">Key block TR-31 de la BDK (hex)</label>
+      <textarea id="bdk_keyblock" name="bdk_keyblock" required>{{ valores.bdk_keyblock }}</textarea>
+
+      <label for="bdk_kcv">KCV esperado de la BDK (hex, 6 caracteres)</label>
+      <input type="text" id="bdk_kcv" name="bdk_kcv" value="{{ valores.bdk_kcv }}" required>
+
+      <button type="submit" class="btn">Importar BDK</button>
+    </form>
+  </div>
+
+  {% if resultado %}
+  <div class="card">
+    <h2>Resultado</h2>
+    <div class="resultado-bloque">Encabezado TR-31:   {{ resultado.header }}
+BDK en claro (hex): {{ resultado.bdk_hex }}
+KCV calculado:      {{ resultado.kcv_calculado }}
+KCV esperado:       {{ resultado.kcv_esperado }}</div>
+
+    {% if resultado.validacion_exitosa %}
+      <div class="alerta alerta-ok">✓ VALIDACIÓN EXITOSA: la BDK es íntegra y correcta.</div>
+    {% else %}
+      <div class="alerta alerta-error">✗ VALIDACIÓN FALLIDA: los KCV no coinciden.</div>
+    {% endif %}
+
+    {% if download_id %}
+      <a class="btn btn-secundario" href="{{ url_for('descargar', result_id=download_id) }}">⬇ Descargar resultado (.txt)</a>
+    {% endif %}
+  </div>
+  {% endif %}
+{% endblock %}

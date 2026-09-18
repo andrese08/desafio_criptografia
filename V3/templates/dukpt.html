@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block titulo %}Descifrado DUKPT{% endblock %}
+{% block contenido %}
+  <a class="btn-volver" href="{{ url_for('menu') }}">&larr; Volver al menú</a>
+
+  <div class="card">
+    <h2>Descifrado DUKPT (ANSI X9.24)</h2>
+    <div class="explicacion">
+      Este proceso reconstruye la llave de una transacción específica a partir
+      de la <strong>BDK</strong> (Base Derivation Key, la llave raíz) y el
+      <strong>KSN</strong> (Key Serial Number, el número de serie de esa
+      transacción), y usa esa llave para intentar descifrar el
+      <strong>criptograma</strong> que ingreses.<br><br>
+      <strong>Necesita:</strong> BDK (16 bytes), KSN (10 bytes) y el criptograma a descifrar, todos en hexadecimal.<br>
+      <strong>Entrega:</strong> las 6 variantes de llave posibles (PIN, MAC, Data, etc.) probadas en 2 modos de cifrado cada una, ordenadas por qué tanto el resultado parece texto legible.
+    </div>
+
+    {% if error %}
+      <div class="alerta alerta-error">⚠ {{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      <label for="bdk">BDK (16 bytes, 32 caracteres hex)</label>
+      <input type="text" id="bdk" name="bdk" value="{{ valores.bdk }}" placeholder="0123456789ABCDEFFEDCBA9876543210" required>
+
+      <label for="ksn">KSN (10 bytes, 20 caracteres hex)</label>
+      <input type="text" id="ksn" name="ksn" value="{{ valores.ksn }}" placeholder="FFFF9876543210E00001" required>
+
+      <label for="ciphertext">Criptograma a descifrar (múltiplo de 8 bytes)</label>
+      <textarea id="ciphertext" name="ciphertext" placeholder="D0911CD510047AC6AEE9CE8AFEDA9301" required>{{ valores.ciphertext }}</textarea>
+
+      <button type="submit" class="btn">Descifrar</button>
+    </form>
+  </div>
+
+  {% if resultado %}
+  <div class="card">
+    <h2>Resultado</h2>
+    <p>Candidatos ordenados de más a menos texto ASCII imprimible:</p>
+    <table class="candidatos">
+      <thead>
+        <tr><th>Variante</th><th>Modo</th><th>Llave</th><th>Texto claro</th></tr>
+      </thead>
+      <tbody>
+        {% for c in resultado.candidatos %}
+        <tr class="{{ 'top-candidato' if loop.first else '' }}">
+          <td>{{ c.nombre }}</td>
+          <td>{{ c.modo }}</td>
+          <td>{{ c.llave }}</td>
+          <td>{{ c.texto }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if download_id %}
+      <a class="btn btn-secundario" href="{{ url_for('descargar', result_id=download_id) }}">⬇ Descargar reporte completo (.txt)</a>
+    {% endif %}
+  </div>
+  {% endif %}
+{% endblock %}

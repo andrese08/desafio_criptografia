@@ -1,0 +1,4 @@
+Flask>=3.0,<4.0
+cryptography>=42.0
+psec>=0.9
+gunicorn>=21.2

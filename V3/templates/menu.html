@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block titulo %}Menú &mdash; Suite de Intercambio de Llaves{% endblock %}
+{% block contenido %}
+  <div class="card">
+    <h2>¿Qué proceso deseas ejecutar?</h2>
+    <div class="menu-opciones">
+      <a class="menu-opcion" href="{{ url_for('dukpt') }}">
+        <div class="emoji">🔓</div>
+        <h3>Descifrado DUKPT</h3>
+        <p>Descifra un criptograma protegido bajo una llave derivada por DUKPT (ANSI X9.24), a partir de la BDK y el KSN.</p>
+      </a>
+      <a class="menu-opcion" href="{{ url_for('elegir_modo', proceso='export-pek') }}">
+        <div class="emoji">📤</div>
+        <h3>Exportar PEK</h3>
+        <p>Genera una PEK y la entrega envuelta en un key block TR-31, protegida con una KEK compartida con la contraparte.</p>
+      </a>
+      <a class="menu-opcion" href="{{ url_for('elegir_modo', proceso='import-bdk') }}">
+        <div class="emoji">📥</div>
+        <h3>Importar BDK</h3>
+        <p>Desenvuelve un key block TR-31 de una BDK recibida de la contraparte y valida su integridad.</p>
+      </a>
+    </div>
+  </div>
+{% endblock %}

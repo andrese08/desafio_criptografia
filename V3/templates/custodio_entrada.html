@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Ingreso de componente &mdash; Custodio {{ numero }}{% endblock %}
+{% block contenido %}
+  <div class="card">
+    <h2>Custodio {{ numero }} &mdash; {{ proceso_titulo }}</h2>
+    <div class="explicacion">
+      Estás a punto de aportar <strong>tu parte</strong> de una llave de
+      cifrado (KEK) que se reconstruye combinando dos componentes
+      independientes. Este valor, por sí solo, no revela nada sobre la llave
+      completa. Por seguridad, ni esta pantalla ni el operador podrán ver tu
+      componente completo una vez enviado — solo se confirmarán los últimos
+      4 caracteres.
+    </div>
+
+    {% if ya_usado and not enviado %}
+      <div class="alerta alerta-error">
+        ⚠ Este enlace ya fue utilizado o expiró. Si necesitas volver a
+        ingresar tu componente, pide al operador que genere un enlace nuevo.
+      </div>
+    {% elif enviado %}
+      <div class="alerta alerta-ok">
+        ✓ Componente recibido correctamente (termina en <strong>{{ mask_preview }}</strong>).
+        Ya puedes cerrar esta ventana.
+      </div>
+    {% else %}
+      {% if error %}
+        <div class="alerta alerta-error">⚠ {{ error }}</div>
+      {% endif %}
+      <form method="post">
+        <label for="componente">Tu componente de la KEK (hex, 64 caracteres)</label>
+        <input type="text" id="componente" name="componente" autocomplete="off" required>
+        <button type="submit" class="btn">Enviar mi componente</button>
+      </form>
+    {% endif %}
+  </div>
+{% endblock %}

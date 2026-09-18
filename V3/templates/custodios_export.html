@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block titulo %}Exportar PEK &mdash; Con custodios{% endblock %}
+{% block contenido %}
+  <a class="btn-volver" href="{{ url_for('elegir_modo', proceso='export-pek') }}">&larr; Volver</a>
+
+  <div class="card">
+    <h2>Exportar PEK &mdash; Con custodios</h2>
+    <div class="explicacion">
+      Comparte cada enlace con su custodio correspondiente (por canales
+      distintos). Ningún componente completo se muestra en esta pantalla —
+      solo se confirman los últimos 4 caracteres una vez recibidos. El botón
+      de generar se habilita automáticamente cuando ambos custodios hayan
+      ingresado su parte.
+    </div>
+
+    <h3 style="margin-bottom:6px;">Enlaces temporales (un solo uso, expiran en 30 min)</h3>
+
+    <p style="margin-bottom:4px;"><strong>Custodio 1</strong></p>
+    <div class="enlace-custodio">
+      <span id="enlace-1">{{ enlace_1 }}</span>
+      <button type="button" id="btn-enlace-1" data-copy-target="enlace-1">Copiar</button>
+    </div>
+
+    <p style="margin:14px 0 4px;"><strong>Custodio 2</strong></p>
+    <div class="enlace-custodio">
+      <span id="enlace-2">{{ enlace_2 }}</span>
+      <button type="button" id="btn-enlace-2" data-copy-target="enlace-2">Copiar</button>
+    </div>
+
+    <div style="margin-top:20px;" data-estado-url="{{ url_for('custodios_estado', proceso='export-pek', session_id=session_id) }}">
+      <div class="custodio-estado">
+        <span>Custodio 1 <span id="mask-1" style="font-family: monospace; color:#777;"></span></span>
+        <span id="badge-1" class="badge badge-pendiente">Pendiente</span>
+      </div>
+      <div class="custodio-estado">
+        <span>Custodio 2 <span id="mask-2" style="font-family: monospace; color:#777;"></span></span>
+        <span id="badge-2" class="badge badge-pendiente">Pendiente</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Datos adicionales y ejecución</h2>
+
+    {% if error %}
+      <div class="alerta alerta-error">⚠ {{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('custodios_ejecutar', proceso='export-pek', session_id=session_id) }}">
+      <label for="kek_kcv">KCV esperado de la KEK (hex, 6 caracteres)</label>
+      <input type="text" id="kek_kcv" name="kek_kcv" value="{{ kek_kcv_valor or '' }}" required>
+
+      <button type="submit" class="btn" id="btn-ejecutar" disabled>Generar PEK</button>
+    </form>
+  </div>
+
+  {% if resultado %}
+  <div class="card">
+    <h2>Resultado</h2>
+    <div class="resultado-bloque">Criptograma TR-31:  {{ resultado.block_hex }}
+KCV de la PEK TDES: {{ resultado.kcv_pek }}</div>
+
+    {% if resultado.autoverificacion_ok %}
+      <div class="alerta alerta-ok">✓ Autoverificación exitosa: el bloque se desenvuelve correctamente y el KCV coincide.</div>
+    {% else %}
+      <div class="alerta alerta-error">✗ Autoverificación FALLIDA.</div>
+    {% endif %}
+
+    {% if download_id %}
+      <a class="btn btn-secundario" href="{{ url_for('descargar', result_id=download_id) }}">⬇ Descargar resultado (.txt)</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titulo %}{{ info.titulo }}{% endblock %}
+{% block contenido %}
+  <a class="btn-volver" href="{{ url_for('menu') }}">&larr; Volver al menú</a>
+
+  <div class="card">
+    <h2>{{ info.titulo }}</h2>
+    <div class="explicacion">
+      {{ info.explicacion }}<br><br>
+      <strong>Entrega:</strong> {{ info.entrega }}
+    </div>
+
+    <p>¿Cómo se van a ingresar los <strong>dos componentes de la KEK</strong>?</p>
+
+    <div class="modo-opciones">
+      <form method="get" action="{{ url_for(proceso.replace('-', '_') + '_individual') }}">
+        <button type="submit" class="modo-opcion">
+          <h3>🧑 Una sola persona</h3>
+          <p>Tú mismo tienes o vas a ingresar los dos componentes en la misma pantalla.</p>
+        </button>
+      </form>
+
+      <form method="post" action="{{ url_for('custodios_nueva', proceso=proceso) }}">
+        <button type="submit" class="modo-opcion">
+          <h3>👥 Con custodios</h3>
+          <p>Cada componente lo ingresa una persona distinta, desde un enlace temporal que les compartes.</p>
+        </button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
